@@ -60,37 +60,6 @@ public class ImpLozenge{
     }
 
 
-    void findMovable(){
-	for (Map.Entry<Coord,Integer> e: dir.entrySet()){
-	    movable.get(e.getKey()).clear();
-	    findTypeAaround(e.getKey(),e.getValue());
-	    findTypeBaround(e.getKey(),e.getValue());
-	}
-    }
-
-    void findTypeAaround(Coord c, int direction){
-	if (impurities.get(c) != null && impurities.get(c) == direction){
-	    movable.get(c).add(new Move(typeA, (direction+1)%3));
-	    movable.get(c).add(new Move(typeA, (direction+2)%3));
-	}
-    }
-
-    void findTypeBaround(Coord c, int direction){
-	int[] ds = {0,0,1,1,2,2};
-	int[] dx = {-1,1,0,0,1,-1};
-	int[] dy = {1,-1,-1,1,0,0};
-	int[] impdir = {2,1,0,2,1,0};
-	int[] newdir = {2,1,0,2,1,0};
-
-	for (int i = 0; i < dx.length; i++){
-	    Coord f = new Coord(c.x + dx[i], c.y + dy[i]);
-	    if (direction == ds[i] && impurities.get(f) != null && impurities.get(f) == impdir[i]){
-		movable.get(c).add(new Move(typeB, newdir[i]));
-		return;
-	    }
-	}
-    }
-
 
 
     HashMap<Coord,HashSet<Move>>  getMovable(){
