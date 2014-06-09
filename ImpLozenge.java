@@ -156,26 +156,6 @@ public class ImpLozenge{
 
     public static void main(String[] args){
 	ImpLozenge tiling = new ImpLozenge(3);
-	System.out.println(tiling.dir);
-	System.out.println(tiling.impurities);
-	tiling.findMovable();
-	for (Map.Entry<Coord,HashSet<Move>> e: tiling.movable.entrySet()){
-	    System.out.println(e);
-	}
-	tiling.move(new Coord(2,0), new Move(1,1));
-	System.out.println(tiling.dir);
-	System.out.println(tiling.impurities);
-	tiling.findMovable();
-	for (Map.Entry<Coord,HashSet<Move>> e: tiling.movable.entrySet()){
-	    System.out.println(e);
-	}
-	tiling.move(new Coord(1,1), new Move(2,1));
-	System.out.println(tiling.dir);
-	System.out.println(tiling.impurities);
-	tiling.findMovable();
-	for (Map.Entry<Coord,HashSet<Move>> e: tiling.movable.entrySet()){
-	    System.out.println(e);
-	}
     }
 
 }
