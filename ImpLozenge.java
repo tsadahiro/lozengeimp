@@ -5,22 +5,18 @@ public class ImpLozenge{
 
     int size;
     HashMap<Coord,Integer> dir;
-    //HashMap<Coord,Integer> movable;
     HashMap<Coord,Integer> impurities;
-    HashMap<Coord,HashSet<Move>> movable;
-    static int typeA = 1, typeB = 2;
+    static int typeA = 1, typeB = 2, typeC = 3;
 
     ImpLozenge(int s){
-	size = s;
+	size = s; // length of an edge of the triangle
 	dir = new HashMap<Coord,Integer>();
-	movable = new HashMap<Coord, HashSet<Move>>();
 	impurities = new HashMap<Coord,Integer>();
 
 	for (int i = 0; i < size; i++){
 	    for (int j = 0; j < size -i; j++){
 		Coord c = new Coord(i,j);
 		HashSet<Move> moveset = new HashSet<Move>();
-		movable.put(c, moveset); // insert the empty set
 		dir.put(new Coord(i,j),0); // initial configuration
 	    }
 	}
@@ -31,9 +27,8 @@ public class ImpLozenge{
     }
 
     void move(Coord c, Move m){
-	if (movable.get(c) == null) return;
 
-	if (m.type == typeA){
+	if (m.type == typeA){ // rotate a unit triangle
 	    dir.put(c, m.angle);
 	    impurities.put(c, m.angle);
 	}
@@ -50,12 +45,29 @@ public class ImpLozenge{
 		Coord oldsite = new Coord(c.x + ox[i], c.y + oy[i]);
 		if (dir.get(c) == ds[i] & m.angle == newdir[i]){
 		    dir.put(c,m.angle);
-		    //System.out.println(oldsite);
 		    impurities.remove(oldsite);
 		    impurities.put(newsite,ds[i]);
 		    break;
 		}
 	    }
+	}
+	else if (m.type == typeC){
+	    int[] ds =     {0,2}; // current direction from white
+	    int[] newdir = {2,0}; // new     direction from white
+	    int[] vx =     {0,1};
+	    int[] vy =     {-1,-1};
+	    int[] wx =     {1,0};
+	    int[] wy =     {-1,-1};
+
+	    for (int i = 0; i < ds.length; i++){
+		Coord v = new Coord(c.x + vx[i], c.y + vy[i]);
+		Coord w = new Coord(c.x + wx[i], c.y + wy[i]);
+		if (dir.get(c) == ds[i] & m.angle == newdir[i]){
+		    dir.put(c,m.angle);
+		    break;
+		}
+	    }
+
 	}
     }
 
