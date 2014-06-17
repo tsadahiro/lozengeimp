@@ -3,9 +3,9 @@ import java.util.*;
 
 public class ImpLozenge{
 
-    int size;
-    HashMap<Coord,Integer> dir;
-    HashMap<Coord,Integer> impurities;
+    public int size;
+    public HashMap<Coord,Integer> dir;
+    public HashMap<Coord,Integer> impurities;
     static int typeA = 1, typeB = 2, typeC = 3;
 
     ImpLozenge(int s){
@@ -26,11 +26,34 @@ public class ImpLozenge{
 	}
     }
 
+
+    ImpLozenge(String s){
+	size = Integer.parseInt(s); // length of an edge of the triangle
+	dir = new HashMap<Coord,Integer>();
+	impurities = new HashMap<Coord,Integer>();
+
+	for (int i = 0; i < size; i++){
+	    for (int j = 0; j < size -i; j++){
+		Coord c = new Coord(i,j);
+		HashSet<Move> moveset = new HashSet<Move>();
+		dir.put(new Coord(i,j),0); // initial configuration
+	    }
+	}
+	for (int i = 0; i < size; i+=2){
+	    Coord c = new Coord(i, size - i -1);
+	    impurities.put(c,0);
+	}
+    }
+
+    String dir(){
+	return dir.toString();
+    }
+
     void move(Coord c, Move m){
 
 	if (m.type == typeA){ // rotate a unit triangle
-	    dir.put(c, m.angle);
-	    impurities.put(c, m.angle);
+	    dir.put(c, m.dir);
+	    impurities.put(c, m.dir);
 	}
 	else if (m.type == typeB){
 	    int[] ds =     {0,1,0,2,1,2}; // current direction from white
@@ -43,8 +66,8 @@ public class ImpLozenge{
 	    for (int i = 0; i < ds.length; i++){
 		Coord newsite = new Coord(c.x + dx[i], c.y + dy[i]);
 		Coord oldsite = new Coord(c.x + ox[i], c.y + oy[i]);
-		if (dir.get(c) == ds[i] & m.angle == newdir[i]){
-		    dir.put(c,m.angle);
+		if (dir.get(c) == ds[i] & m.dir == newdir[i]){
+		    dir.put(c,m.dir);
 		    impurities.remove(oldsite);
 		    impurities.put(newsite,ds[i]);
 		    break;
@@ -52,23 +75,41 @@ public class ImpLozenge{
 	    }
 	}
 	else if (m.type == typeC){
-	    int[] ds =     {0,2}; // current direction from white
-	    int[] newdir = {2,0}; // new     direction from white
-	    int[] vx =     {0,1};
-	    int[] vy =     {-1,-1};
-	    int[] wx =     {1,0};
-	    int[] wy =     {-1,-1};
-
-	    for (int i = 0; i < ds.length; i++){
-		Coord v = new Coord(c.x + vx[i], c.y + vy[i]);
-		Coord w = new Coord(c.x + wx[i], c.y + wy[i]);
-		if (dir.get(c) == ds[i] & m.angle == newdir[i]){
-		    dir.put(c,m.angle);
-		    break;
-		}
+	    Coord d = new Coord(c.x+1,c.y);
+	    Coord e = new Coord(c.x,c.y+1);
+	    if (m.dir == 1){
+		dir.put(c,1);
+		dir.put(d,2);
+		dir.put(e,0);
 	    }
-
+	    else if (m.dir == 2){
+		dir.put(c,2);
+		dir.put(d,0);
+		dir.put(e,1);
+	    }
 	}
+
+
+
+
+	//else if (m.type == typeC){
+	//    int[] ds =     {1,2}; // current direction from white
+	//    int[] newdir = {2,1}; // new     direction from white
+	//    int[] vdir =   {0,2};
+	//    int[] wdir =   {1,0};
+	//
+	//    for (int i = 0; i < ds.length; i++){
+	//	Coord v = new Coord(c.x + 1, c.y);
+	//	Coord w = new Coord(c.x, c.y + 1);
+	//	if (dir.get(c) == ds[i] & m.dir == newdir[i]){
+	//	    dir.put(c,m.dir);
+	//	    dir.put(v,vdir[i]);
+	//	    dir.put(w,wdir[i]);
+	//	    break;
+	//	}
+	//    }
+	//
+	//}
     }
 
 
@@ -84,20 +125,22 @@ public class ImpLozenge{
 	    }
 	}
 	for (Map.Entry<Coord,Integer> e: dir.entrySet()){
-	    getTypeAaround(e.getKey(),e.getValue(), possiblemoves);
-	    getTypeBaround(e.getKey(),e.getValue(), possiblemoves);
+	    getTypeAaround(e.getKey(), possiblemoves);
+	    getTypeBaround(e.getKey(), possiblemoves);
+	    getTypeCaround(e.getKey(), possiblemoves);
 	}
 	return possiblemoves;
     }
 
-    void getTypeAaround(Coord c, int direction,HashMap<Coord,HashSet<Move>> possiblemoves){
-	if (impurities.get(c) != null && impurities.get(c) == direction){
-	    possiblemoves.get(c).add(new Move(typeA, (direction+1)%3));
-	    possiblemoves.get(c).add(new Move(typeA, (direction+2)%3));
+    void getTypeAaround(Coord c, HashMap<Coord,HashSet<Move>> possiblemoves){ 
+
+	if (impurities.get(c) != null && impurities.get(c) == dir.get(c)){
+	    possiblemoves.get(c).add(new Move(typeA, (dir.get(c)+1)%3));
+	    possiblemoves.get(c).add(new Move(typeA, (dir.get(c)+2)%3));
 	}
     }
 
-    void getTypeBaround(Coord c, int direction, HashMap<Coord,HashSet<Move>> possiblemoves){
+    void getTypeBaround(Coord c, HashMap<Coord,HashSet<Move>> possiblemoves){
 	int[] ds = {0,0,1,1,2,2};
 	int[] dx = {-1,1,0,0,1,-1};
 	int[] dy = {1,-1,-1,1,0,0};
@@ -106,35 +149,53 @@ public class ImpLozenge{
 
 	for (int i = 0; i < dx.length; i++){
 	    Coord f = new Coord(c.x + dx[i], c.y + dy[i]);
-	    if (direction == ds[i] && impurities.get(f) != null && impurities.get(f) == impdir[i]){
+	    if (dir.get(c) == ds[i] && impurities.get(f) != null && impurities.get(f) == impdir[i]){
 		possiblemoves.get(c).add(new Move(typeB, newdir[i]));
 		return;
 	    }
 	}
     }
 
-    public boolean isValid(){
-	
-	for (int i = 0; i < size -1; i++){
-	    for (int j = 0; j < size -1; j++){
-		Coord c = new Coord(i,j);
-		Coord d = new Coord(i+1,j);
-		Coord e = new Coord(i,j+1);
-		if (dir.get(c) == null || dir.get(d) == null || dir.get(e) == null){
-		    continue;
-		}
-		//System.out.println(dir.get(c) + " " + dir.get(e));
-		
-		if (dir.get(c) == 1 && dir.get(d) ==0){
-		    return(false);
-		}
-		if (dir.get(c) == 2 && dir.get(e) ==0){
-		    return(false);
-		}
-	    }
+    void getTypeCaround(Coord c, HashMap<Coord,HashSet<Move>> possiblemoves){
+	Coord d = new Coord(c.x+1, c.y);
+	Coord e = new Coord(c.x, c.y+1);
+
+	if ((dir.get(c)!=null && dir.get(c) == 2) && 
+	    (dir.get(d)!=null && dir.get(d) == 0) && 
+	    (dir.get(e)!=null && dir.get(e) == 1)){
+	    possiblemoves.get(c).add(new Move(typeC, 1));
 	}
-	return(true);
+	if ((dir.get(c)!=null && dir.get(c) == 1) && 
+	    (dir.get(d)!=null && dir.get(d) == 2) && 
+	    (dir.get(e)!=null && dir.get(e) == 0)){
+	    possiblemoves.get(c).add(new Move(typeC, 2));
+	}
     }
+
+    /*
+    void getTypeCaround(Coord c, int direction, HashMap<Coord,HashSet<Move>> possiblemoves){
+	int[] ds = {0,0,1,1,2,2};
+	int[] dx = {-1,1,0,0,1,-1};
+	int[] dy = {1,-1,-1,1,0,0};
+	int[] impdir = {2,1,0,2,1,0};
+	int[] newdir = {2,1,0,2,1,0};
+
+	Coord v = new Coord(c.x + 1, c.y);
+	Coord w = new Coord(c.x, c.y + 1);
+
+	if (dir.get(v) != null && dir.get(w) != null && 
+	    dir.get(c) == 1 && dir.get(v) == 2 && dir.get(w) == 0){
+	    possiblemoves.get(c).add(new Move(typeC, 2));
+	    //System.out.println("typeC");
+	}
+	if (dir.get(v) != null && dir.get(w) != null && 
+	    dir.get(c) == 2 && dir.get(v) == 0 && dir.get(w) == 1){
+	    //possiblemoves.get(c).add(new Move(typeC, 1));
+	}
+    }
+    */
+
+
 
     @Override
     public String toString(){
@@ -202,23 +263,23 @@ class Coord{
 class Move{
 
     int type;
-    int angle; // 0 west, 1 south-east, 2 north-east
+    int dir; // 0 west, 1 south-east, 2 north-east
 
     Move(int t, int a){
 	this.type = t;
-	this.angle = a;
+	this.dir = a;
     }
 
     @Override
     public String toString(){
 	if (type == ImpLozenge.typeA){
-	    return("A: " + angle);
+	    return("A: " + dir);
 	}
 	else if (type == ImpLozenge.typeB){
-	    return("B: " + angle);
+	    return("B: " + dir);
 	}
 	else{
-	    return("C: " + angle);
+	    return("C: " + dir);
 	}
     }
 
@@ -229,7 +290,7 @@ class Move{
     
     @Override
     public int hashCode(){
-	return 10*type + angle;
+	return 10*type + dir;
     }
 
 }
